@@ -1,0 +1,703 @@
+{
+  "name": "HireSense AI",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "",
+        "height": 720,
+        "width": 1856,
+        "color": "#432834"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -240,
+        -128
+      ],
+      "typeVersion": 1,
+      "id": "74d2ffdb-c4aa-42e3-88bb-95a70b52f4a3",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "binaryPropertyName": "Resume",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        160,
+        16
+      ],
+      "id": "3153f977-2083-4239-8151-cf8965c5b43f",
+      "name": "Extract Resume Text"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a7f596b0-72d2-4148-a507-7aaafc10832b",
+              "name": "job_description",
+              "value": "={{ $('Resume Upload Form').item.json['Job Description'] || \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "6b29d005-2cd6-4cbc-b64c-15bf4a3edac5",
+              "name": "resume_text",
+              "value": "={{ $('Extract Resume Text').item.json.text }}",
+              "type": "string"
+            },
+            {
+              "id": "be376b73-39f9-4e8a-bbad-ac42ddb8b084",
+              "name": "role",
+              "value": "={{ $('Resume Upload Form').item.json.Role }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        336,
+        16
+      ],
+      "id": "44ff161c-8d6f-4c98-a706-208b33ac40c3",
+      "name": "Prepare AI Input1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an expert technical recruiter. Evaluate how well this resume fits the target role.\n\nTARGET ROLE: {{ $('Resume Upload Form').item.json.Role }}\n\nJOB DESCRIPTION (may be empty):\n{{ $json.job_description }}\n\nRESUME:\n{{ $('Extract Resume Text').item.json.text }}\n\nFollow these steps:\n1. Build the list of required skills for the target role. If a job description is given, take the required skills from it. If it is empty, list the 8 to 10 core skills normally required for the target role (tools, languages, frameworks, concepts). Put them in required_skills.\n2. Check the resume for each required skill. Count a skill as matched if there is clear evidence: skills section, project, internship, certification, coursework or experience. Do not assume skills that are not written.\n3. Fill matched_skills (required skills found) and missing_skills (required skills not found).\n4. Score from 0 to 100:\n   - 60 points: percentage of required skills matched\n   - 20 points: relevant projects and internships for this role\n   - 10 points: years of experience and depth\n   - 10 points: education and certifications\n5. Be fair to freshers. Give credit for related skills, coursework, projects, internships and certifications, not only exact tool names. If the resume is from a clearly different field than the target role, score below 50. If it partly overlaps, score by the overlap.\n6. recommendation must be exactly one of: Shortlist (score 70 or more), Maybe (45 to 69), Reject (below 45).\n7. Ignore name, gender, age and college name while scoring.\n8. If the resume text is empty or unreadable, return match_score 0, recommendation Reject, and say so in gaps.\n9. Do not invent any detail. If email or phone is missing, return an empty string.\n10. strengths and gaps: maximum 2 short sentences each, specific to the target role.",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        496,
+        16
+      ],
+      "id": "22c2e0fc-f4c0-4ed5-9021-ff004f121bd5",
+      "name": "AI Resume Scorer"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"name\": \"Candidate Name\",\n  \"email\": \"candidate@email.com\",\n  \"phone\": \"9999999999\",\n  \"required_skills\": [\"Skill 1\", \"Skill 2\", \"Skill 3\", \"Skill 4\", \"Skill 5\"],\n  \"matched_skills\": [\"Skill 1\", \"Skill 2\"],\n  \"missing_skills\": [\"Skill 3\", \"Skill 4\", \"Skill 5\"],\n  \"years_experience\": 0,\n  \"education\": \"Degree and branch\",\n  \"match_score\": 60,\n  \"strengths\": \"Two short sentences on strengths for this role\",\n  \"gaps\": \"Two short sentences on gaps for this role\",\n  \"recommendation\": \"Maybe\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        736,
+        272
+      ],
+      "id": "23285559-4e6e-4824-bd46-415ba51b11ac",
+      "name": "Score JSON Parser"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1u7uNl-Yjt_PzhsliJww-0fyMO_d6Qr0MBt1Rzi5AzFI",
+          "mode": "list",
+          "cachedResultName": "AI Agent",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1u7uNl-Yjt_PzhsliJww-0fyMO_d6Qr0MBt1Rzi5AzFI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1u7uNl-Yjt_PzhsliJww-0fyMO_d6Qr0MBt1Rzi5AzFI/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "name": "={{ $json.output.name }}",
+            "email": "={{ $json.output.email }}",
+            "phone": "={{ $json.output.phone }}",
+            "skills": "={{ $json.output.skills }}",
+            "years_experience": "={{ $json.output.years_experience }}",
+            "education": "={{ $json.output.education }}",
+            "match_score": "={{ $json.output.match_score }}",
+            "strengths": "={{ $json.output.strengths }}",
+            "gaps": "={{ $json.output.gaps }}",
+            "recommendation": "={{ $json.output.recommendation }}",
+            "date": "={{ $now.format('dd-MM-yyyy') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "skills",
+              "displayName": "skills",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "years_experience",
+              "displayName": "years_experience",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "education",
+              "displayName": "education",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "match_score",
+              "displayName": "match_score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "strengths",
+              "displayName": "strengths",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "gaps",
+              "displayName": "gaps",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "recommendation",
+              "displayName": "recommendation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "date",
+              "displayName": "date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        928,
+        -64
+      ],
+      "id": "a23595cc-8f3b-404f-85ed-c726273b9b98",
+      "name": "Save to Candidate Sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "q6lyVsz3E5NCiAP0",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.output.recommendation }}",
+                    "rightValue": "Shortlist",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "9e058096-5940-4f74-83a6-150d4aa56baf"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "8a0fc2b8-b35b-4da7-803f-187e6aaedfaa",
+                    "leftValue": "={{ $json.output.recommendation }}",
+                    "rightValue": "Maybe",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "20806e17-6e69-4e1f-af4d-50bbe473c3c0",
+                    "leftValue": "={{ $json.output.recommendation }}",
+                    "rightValue": "Reject",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        912,
+        144
+      ],
+      "id": "69cb1958-bf5a-4f65-9728-126919b53ca4",
+      "name": "Route by Recommendation"
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "={{ $('Resume Upload Form').item.json.Email }}",
+          "mode": "id"
+        },
+        "start": "={{ $now.plus({days: 1}).set({hour: 11, minute: 0, second: 0}).toISO() }}",
+        "end": "={{ $now.plus({days: 1}).set({hour: 11, minute: 30, second: 0}).toISO() }}",
+        "additionalFields": {
+          "attendees": [
+            "={{ $('Resume Upload Form').item.json.Email }}"
+          ],
+          "conferenceDataUi": {
+            "conferenceDataValues": {
+              "conferenceSolution": "hangoutsMeet"
+            }
+          },
+          "summary": "=Interview: {{ $('Resume Upload Form').item.json.Name }} ({{ $('Resume Upload Form').item.json.Role }})"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        1104,
+        32
+      ],
+      "id": "6ab0e4fc-a97d-4dec-90dd-d785d0afa610",
+      "name": "Schedule Interview",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "sESv9K14iLfJbRvi",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "gangadevi2931@gmail.com",
+        "subject": "=⚠️ Review Needed: {{ $('Resume Upload Form').item.json.Name }} for {{ $('Resume Upload Form').item.json.Role }} (Score {{ $json.output.match_score }}/100)",
+        "message": "=<div style=\"background:#f4f6fb;padding:24px 0;font-family:Arial,Helvetica,sans-serif;\">\n  <table align=\"center\" width=\"600\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e3e8f0;\">\n\n    <!-- Header -->\n    <tr>\n      <td style=\"background:#f59e0b;padding:28px 32px;\">\n        <h1 style=\"margin:0;color:#ffffff;font-size:22px;\">⚠️ Manual Review Needed</h1>\n        <p style=\"margin:6px 0 0;color:#fef3c7;font-size:14px;\">{{ $('Resume Upload Form').item.json.Role }} · Borderline candidate, please decide</p>\n      </td>\n    </tr>\n\n    <!-- Candidate summary -->\n    <tr>\n      <td style=\"padding:28px 32px 8px;color:#1f2937;font-size:15px;line-height:1.6;\">\n        <p style=\"margin:0;\">The AI screener marked this candidate as <b>Maybe</b> for the <b>{{ $('Resume Upload Form').item.json.Role }}</b> role. Please review the details below and decide.</p>\n      </td>\n    </tr>\n\n    <!-- Score + details card -->\n    <tr>\n      <td style=\"padding:16px 32px;\">\n        <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#fffbeb;border-left:4px solid #f59e0b;border-radius:8px;\">\n          <tr>\n            <td style=\"padding:16px 20px;color:#1f2937;font-size:14px;line-height:1.9;\">\n              👤 <b>Name:</b> {{ $('Resume Upload Form').item.json.Name }}<br>\n              📧 <b>Email:</b> {{ $('Resume Upload Form').item.json.Email }}<br>\n              📞 <b>Phone:</b> {{ $json.output.phone || 'Not found in resume' }}<br>\n              💼 <b>Applied Role:</b> {{ $('Resume Upload Form').item.json.Role }}<br>\n              🎓 <b>Education:</b> {{ $json.output.education }}<br>\n              ⏱️ <b>Experience:</b> {{ $json.output.years_experience }} years<br>\n              🛠️ <b>Skills:</b> {{ Array.isArray($json.output.skills) ? $json.output.skills.join(\", \") : $json.output.skills }}\n            </td>\n          </tr>\n        </table>\n      </td>\n    </tr>\n\n    <!-- Score -->\n    <tr>\n      <td align=\"center\" style=\"padding:8px 32px 16px;\">\n        <div style=\"display:inline-block;background:#f59e0b;color:#ffffff;font-size:28px;font-weight:bold;padding:12px 28px;border-radius:10px;\">\n          {{ $json.output.match_score }} / 100\n        </div>\n        <p style=\"margin:8px 0 0;color:#6b7280;font-size:13px;\">Match score for {{ $('Resume Upload Form').item.json.Role }}</p>\n      </td>\n    </tr>\n\n    <!-- Strengths -->\n    <tr>\n      <td style=\"padding:0 32px 12px;\">\n        <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#ecfdf5;border-left:4px solid #10b981;border-radius:8px;\">\n          <tr>\n            <td style=\"padding:14px 20px;color:#065f46;font-size:14px;line-height:1.6;\">\n              <b>✅ Strengths</b><br>{{ $json.output.strengths }}\n            </td>\n          </tr>\n        </table>\n      </td>\n    </tr>\n\n    <!-- Gaps -->\n    <tr>\n      <td style=\"padding:0 32px 24px;\">\n        <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#fef2f2;border-left:4px solid #ef4444;border-radius:8px;\">\n          <tr>\n            <td style=\"padding:14px 20px;color:#991b1b;font-size:14px;line-height:1.6;\">\n              <b>❌ Gaps</b><br>{{ $json.output.gaps }}\n            </td>\n          </tr>\n        </table>\n      </td>\n    </tr>\n\n    <!-- Footer -->\n    <tr>\n      <td style=\"background:#f9fafb;padding:18px 32px;color:#6b7280;font-size:13px;border-top:1px solid #e5e7eb;\">\n        Auto-generated by HireSense AI\n      </td>\n    </tr>\n  </table>\n</div>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1296,
+        160
+      ],
+      "id": "6b3a45fd-90af-44c5-a97b-2fcc69421e56",
+      "name": "Notify HR for Review",
+      "webhookId": "3de0ad88-b37c-4705-a6ac-848792c867ae",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "wigt9EjGghHODP3h",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Resume Upload Form').item.json.Email }}",
+        "subject": "=Interview Invitation -  {{ $('Resume Upload Form').item.json.Role }}",
+        "message": "=<div style=\"background:#f4f6fb;padding:24px 0;font-family:Arial,Helvetica,sans-serif;\">\n  <table align=\"center\" width=\"600\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e3e8f0;\">\n\n    <!-- Header -->\n    <tr>\n      <td style=\"background:#4f46e5;padding:28px 32px;\">\n        <h1 style=\"margin:0;color:#ffffff;font-size:22px;\">🎉 Interview Invitation</h1>\n        <p style=\"margin:6px 0 0;color:#c7d2fe;font-size:14px;\">You have been shortlisted for {{ $('Resume Upload Form').item.json.Role }}</p>\n      </td>\n    </tr>\n\n    <!-- Greeting -->\n    <tr>\n      <td style=\"padding:28px 32px 8px;color:#1f2937;font-size:15px;line-height:1.6;\">\n        <p style=\"margin:0 0 12px;\">Hi <b>{{ $('Resume Upload Form').item.json.Name }}</b>,</p>\n        <p style=\"margin:0;\">Thank you for applying for the <b>{{ $('Resume Upload Form').item.json.Role }}</b> role. We were impressed with your profile and would like to invite you for an interview.</p>\n      </td>\n    </tr>\n\n    <!-- Details card -->\n    <tr>\n      <td style=\"padding:16px 32px;\">\n        <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#eef2ff;border-left:4px solid #4f46e5;border-radius:8px;\">\n          <tr>\n            <td style=\"padding:16px 20px;color:#1f2937;font-size:14px;line-height:1.9;\">\n              📌 <b>Role:</b> {{ $('Resume Upload Form').item.json.Role }}<br>\n              📅 <b>Date &amp; Time:</b> {{ DateTime.fromISO($json.start.dateTime).toFormat('dd LLL yyyy, hh:mm a') }}<br>\n              ⏱️ <b>Duration:</b> 30 minutes<br>\n              💻 <b>Mode:</b> Google Meet\n            </td>\n          </tr>\n        </table>\n      </td>\n    </tr>\n\n    <!-- Button -->\n    <tr>\n      <td align=\"center\" style=\"padding:12px 32px 24px;\">\n        <a href=\"{{ $json.hangoutLink }}\" style=\"background:#4f46e5;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:8px;font-size:15px;font-weight:bold;display:inline-block;\">Join Interview</a>\n      </td>\n    </tr>\n\n    <!-- Note -->\n    <tr>\n      <td style=\"padding:0 32px 28px;color:#4b5563;font-size:14px;line-height:1.6;\">\n        <p style=\"margin:0;\">Please reply to this email to confirm your availability. If this time doesn't work, let us know and we'll reschedule.</p>\n      </td>\n    </tr>\n\n    <!-- Footer -->\n    <tr>\n      <td style=\"background:#f9fafb;padding:18px 32px;color:#6b7280;font-size:13px;border-top:1px solid #e5e7eb;\">\n        Regards,<br><b>HR Team</b>\n      </td>\n    </tr>\n  </table>\n</div>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1408,
+        16
+      ],
+      "id": "218222f7-7973-4100-99ff-796771e1adfb",
+      "name": "Send Interview Invite",
+      "webhookId": "9ee88692-6645-45fb-a072-fa0bbd50d390",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "wigt9EjGghHODP3h",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Resume Upload Form').item.json.Email }}",
+        "subject": "=Update on your application -  {{ $('Resume Upload Form').item.json.Role }}",
+        "message": "=<div style=\"background:#f4f6fb;padding:24px 0;font-family:Arial,Helvetica,sans-serif;\">\n  <table align=\"center\" width=\"600\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e3e8f0;\">\n\n    <!-- Header -->\n    <tr>\n      <td style=\"background:#475569;padding:28px 32px;\">\n        <h1 style=\"margin:0;color:#ffffff;font-size:22px;\">Application Update</h1>\n        <p style=\"margin:6px 0 0;color:#cbd5e1;font-size:14px;\">{{ $('Resume Upload Form').item.json.Role }}</p>\n      </td>\n    </tr>\n\n    <!-- Body -->\n    <tr>\n      <td style=\"padding:28px 32px 16px;color:#1f2937;font-size:15px;line-height:1.7;\">\n        <p style=\"margin:0 0 12px;\">Hi <b>{{ $('Resume Upload Form').item.json.Name }}</b>,</p>\n        <p style=\"margin:0 0 12px;\">Thank you for taking the time to apply for the <b>{{ $('Resume Upload Form').item.json.Role }}</b> role and share your profile with us. We truly appreciate your interest.</p>\n        <p style=\"margin:0;\">After careful review, we will not be moving forward with your application for this role at this time. This was a competitive process, and the decision is based on how closely the current requirements match.</p>\n      </td>\n    </tr>\n\n    <!-- Encouragement card -->\n    <tr>\n      <td style=\"padding:8px 32px 24px;\">\n        <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#f1f5f9;border-left:4px solid #475569;border-radius:8px;\">\n          <tr>\n            <td style=\"padding:16px 20px;color:#334155;font-size:14px;line-height:1.7;\">\n              💡 We encourage you to keep building your skills and apply again for future openings that match your profile.\n            </td>\n          </tr>\n        </table>\n      </td>\n    </tr>\n\n    <!-- Footer -->\n    <tr>\n      <td style=\"background:#f9fafb;padding:18px 32px;color:#6b7280;font-size:13px;border-top:1px solid #e5e7eb;\">\n        Wishing you all the best,<br><b>HR Team</b>\n      </td>\n    </tr>\n  </table>\n</div>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1120,
+        368
+      ],
+      "id": "f6ba5abf-1045-4c77-a7de-38e378f54624",
+      "name": "\tSend Rejection Mail",
+      "webhookId": "45d41fe3-52ae-49fa-bcec-ebfd4588f105",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "wigt9EjGghHODP3h",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        288,
+        784
+      ],
+      "id": "003623ee-0d27-4c82-bf02-aeb3e034d529",
+      "name": "OpenAI Flash Model",
+      "credentials": {
+        "openAiApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        400,
+        272
+      ],
+      "id": "82447e46-a424-40ab-a5ba-5a4081139c81",
+      "name": "Gemini Flash Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "P5RfN4ei5r6m4Bh2",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "formTitle": "HireSense AI: Resume Screening",
+        "formDescription": "Upload your resume (PDF) to get AI screening. Your resume is processed by AI and stored in a Google Sheet.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Name",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Email",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Role",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "AI Automation Engineer"
+                  },
+                  {
+                    "option": "Full Stack Developer"
+                  },
+                  {
+                    "option": "Data Analyst"
+                  },
+                  {
+                    "option": "Web Developer"
+                  },
+                  {
+                    "option": "AI Engineer"
+                  },
+                  {
+                    "option": "ML Engineer"
+                  },
+                  {
+                    "option": "Software Engineer"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Mode",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Real Hiring"
+                  },
+                  {
+                    "option": "Resume Feedback (practice)"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Resume",
+              "fieldType": "file",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        -80,
+        16
+      ],
+      "id": "30d1ed0d-c728-46e9-98af-a60e57e89ada",
+      "name": "Resume Upload Form",
+      "webhookId": "359e37ff-2596-41fa-a266-b5b1670b4340"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Extract Resume Text": {
+      "main": [
+        [
+          {
+            "node": "Prepare AI Input1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare AI Input1": {
+      "main": [
+        [
+          {
+            "node": "AI Resume Scorer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Resume Scorer": {
+      "main": [
+        [
+          {
+            "node": "Save to Candidate Sheet",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Route by Recommendation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Score JSON Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Resume Scorer",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Recommendation": {
+      "main": [
+        [
+          {
+            "node": "Schedule Interview",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Notify HR for Review",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "\tSend Rejection Mail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Interview": {
+      "main": [
+        [
+          {
+            "node": "Send Interview Invite",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Flash Model": {
+      "ai_languageModel": [
+        []
+      ]
+    },
+    "Gemini Flash Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Resume Scorer",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resume Upload Form": {
+      "main": [
+        [
+          {
+            "node": "Extract Resume Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "a761dcb2-6b5b-4ff4-9931-71b42a9dc8a7",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5f3d0350e168fa07c9b951092f6935dcda9ee5461c9d257bc4d4b0eb43dfe260"
+  },
+  "nodeGroups": [],
+  "id": "tcNCW4EtFLZcVntB",
+  "tags": []
+}
