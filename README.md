@@ -89,21 +89,21 @@ Route by Recommendation (Switch)
 ## 📸 Screenshots
 
 ### Workflow: Shortlist path
-![Shortlist path](docs/screenshots/workflow.png)
+![Shortlist path](workflow.png)
 
 ### Workflow: Reject path
-![Reject path](docs/screenshots/workflow-reject-path.png)
+![Reject path](workflow-reject-path.png)
 
 ### Candidate database (Google Sheets)
 Every screened resume is saved with score, skills, strengths, gaps and recommendation. (Contact details blurred.)
 
-![Candidate sheet](docs/screenshots/candidate-sheet.png)
+![Candidate sheet](candidate-sheet.png)
 
 ### Interview invitation email
-<img src="docs/screenshots/interview-email.png" width="320" alt="Interview invitation email" />
+<img src="interview-email.png" width="320" alt="Interview invitation email" />
 
 ### Auto-created Google Calendar event with Meet
-<img src="docs/screenshots/calendar-event.png" width="320" alt="Calendar event" />
+<img src="calendar-event.png" width="320" alt="Calendar event" />
 
 ---
 
