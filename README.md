@@ -17,6 +17,7 @@ Upload a resume through a simple web form. HireSense AI reads it, scores it agai
 - [Problem Statement](#-problem-statement)
 - [Features](#-features)
 - [Workflow Overview](#-workflow-overview)
+- [Screenshots](#-screenshots)
 - [Tech Stack](#-tech-stack)
 - [How It Works](#-how-it-works)
 - [Setup Guide](#-setup-guide)
@@ -81,9 +82,28 @@ Route by Recommendation (Switch)
         └── Reject ─────► Send Rejection Mail (Gmail)
 ```
 
-> 📸 Add your workflow screenshot at `docs/screenshots/workflow.png` and it will show here:
->
-> `![Workflow](docs/screenshots/workflow.png)`
+![HireSense AI workflow](docs/screenshots/workflow.png)
+
+---
+
+## 📸 Screenshots
+
+### Workflow: Shortlist path
+![Shortlist path](docs/screenshots/workflow.png)
+
+### Workflow: Reject path
+![Reject path](docs/screenshots/workflow-reject-path.png)
+
+### Candidate database (Google Sheets)
+Every screened resume is saved with score, skills, strengths, gaps and recommendation. (Contact details blurred.)
+
+![Candidate sheet](docs/screenshots/candidate-sheet.png)
+
+### Interview invitation email
+<img src="docs/screenshots/interview-email.png" width="320" alt="Interview invitation email" />
+
+### Auto-created Google Calendar event with Meet
+<img src="docs/screenshots/calendar-event.png" width="320" alt="Calendar event" />
 
 ---
 
@@ -212,7 +232,11 @@ hiresense-ai/
 │   └── scoring-prompt.md        # AI scoring prompt
 └── docs/
     └── screenshots/
-        └── workflow.png
+        ├── workflow.png
+        ├── workflow-reject-path.png
+        ├── candidate-sheet.png
+        ├── interview-email.png
+        └── calendar-event.png
 ```
 
 ---
