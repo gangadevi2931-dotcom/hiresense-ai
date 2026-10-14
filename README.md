@@ -82,7 +82,7 @@ Route by Recommendation (Switch)
         └── Reject ─────► Send Rejection Mail (Gmail)
 ```
 
-![HireSense AI workflow](docs/screenshots/workflow.png)
+![HireSense AI workflow](workflow.png)
 
 ---
 
